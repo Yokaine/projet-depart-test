@@ -1,0 +1,41 @@
+{
+  "name": "reservation-salles",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "eslint src test --no-error-on-unmatched-pattern",
+    "build": "tsc",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "test": "npm run build && jest --runInBand",
+    "test:starter": "npm run build && jest --runInBand test/demarrage.test.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.2.11",
+    "@nestjs/core": "11.2.11",
+    "@nestjs/platform-express": "11.2.11",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "11.2.11",
+    "@types/node": "22.18.6",
+    "@types/pg": "8.23.1",
+    "eslint": "9.39.5",
+    "jest": "30.5.2",
+    "supertest": "7.3.2",
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.73.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "<rootDir>/test/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "dist/**/*.js",
+      "!dist/main.js"
+    ]
+  }
+}

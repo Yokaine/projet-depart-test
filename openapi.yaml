@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: API de réservation de salles
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      summary: Vérifier la connexion à PostgreSQL
+      responses:
+        '200':
+          description: Base joignable
+          content:
+            application/json:
+              example: {status: ok}
+        '503':
+          description: Base indisponible
+  /salles:
+    get:
+      summary: Lister les salles
+      responses:
+        '200':
+          description: Liste des salles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Salle'}
+    post:
+      summary: Créer une salle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nom]
+              properties:
+                nom: {type: string, minLength: 1, maxLength: 100, example: 'Salle 204'}
+      responses:
+        '201':
+          description: Salle créée
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Salle'}
+        '400':
+          description: Nom invalide
+  /salles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    delete:
+      summary: Supprimer une salle
+      responses:
+        '204':
+          description: Salle supprimée
+        '400':
+          description: Identifiant invalide
+        '404':
+          description: Salle introuvable
+        '409':
+          description: La salle a des réservations
+  /reservations:
+    get:
+      summary: Lister les réservations
+      responses:
+        '200':
+          description: Liste des réservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Reservation'}
+    post:
+      summary: Créer une réservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [salleId, debut, fin]
+              properties:
+                salleId: {type: integer, format: int32, minimum: 1}
+                debut: {type: string, format: date-time, example: '2030-10-15T09:00:00Z'}
+                fin: {type: string, format: date-time, example: '2030-10-15T10:00:00Z'}
+      responses:
+        '201':
+          description: Réservation créée
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Reservation'}
+        '400':
+          description: Identifiant ou créneau invalide
+        '404':
+          description: Salle introuvable
+        '409':
+          description: Réservation existante sur le créneau
+  /reservations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    delete:
+      summary: Annuler une réservation
+      responses:
+        '204':
+          description: Réservation annulée
+        '400':
+          description: Identifiant invalide
+        '404':
+          description: Réservation introuvable
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: {type: integer, format: int32, minimum: 1}
+  schemas:
+    Salle:
+      type: object
+      required: [id, nom]
+      properties:
+        id: {type: integer, format: int32}
+        nom: {type: string}
+    Reservation:
+      type: object
+      required: [id, salle_id, debut, fin]
+      properties:
+        id: {type: integer, format: int32}
+        salle_id: {type: integer, format: int32}
+        debut: {type: string, format: date-time}
+        fin: {type: string, format: date-time}
