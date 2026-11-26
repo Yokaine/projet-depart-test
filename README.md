@@ -72,6 +72,7 @@ Essayez ensuite avec un début à 10 h et une fin à 11 h.
 | GET /reservations | | 200 | |
 | POST /reservations | salleId, debut, fin | 201 | 400 pour une entrée invalide, 404 si salle absente, 409 si conflit |
 | DELETE /reservations/:id | identifiant dans l’URL | 204 | 400 si identifiant invalide, 404 si absente |
+| GET /salles/disponibles | debut, fin en query | 200 | 400 si date absente, invalide ou fin ≤ début |
 
 Les dates sont en UTC, avec un `Z` final.
 

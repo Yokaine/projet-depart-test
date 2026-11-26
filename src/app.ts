@@ -1,7 +1,7 @@
 import {
   BadRequestException, Body, ConflictException, Controller, Delete, Get,
   HttpCode, Module, NotFoundException, Param, ParseIntPipe, Post,
-  ServiceUnavailableException,
+  ServiceUnavailableException, Query,
 } from '@nestjs/common'
 import { Database } from './database'
 import { lireCreneau, seChevauchent } from './regles'
@@ -29,6 +29,28 @@ export class Api {
   @Get('salles')
   async salles() {
     return (await this.db.pool.query('SELECT id, nom FROM salles ORDER BY id')).rows
+  }
+
+    @Get('salles/disponibles')
+  async sallesDisponibles(@Query('debut') debut?: unknown, @Query('fin') fin?: unknown) {
+    const creneau = lireCreneau(debut, fin)
+
+    const lignes = (await this.db.pool.query<{ id: number, nom: string, debut: Date | null, fin: Date | null }>(`
+      SELECT s.id, s.nom, r.debut, r.fin
+      FROM salles s
+      LEFT JOIN reservations r ON r.salle_id = s.id
+      ORDER BY s.id
+    `)).rows
+
+    const salles = new Map<number, { id: number, nom: string, reservations: { debut: Date, fin: Date }[] }>()
+    for (const ligne of lignes) {
+      if (!salles.has(ligne.id)) salles.set(ligne.id, { id: ligne.id, nom: ligne.nom, reservations: [] })
+      if (ligne.debut && ligne.fin) salles.get(ligne.id)!.reservations.push({ debut: ligne.debut, fin: ligne.fin })
+    }
+
+    return [...salles.values()]
+      .filter(salle => !salle.reservations.some(reservation => seChevauchent(reservation, creneau)))
+      .map(({ id, nom }) => ({ id, nom }))
   }
 
   @Post('salles')
