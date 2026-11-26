@@ -60,6 +60,30 @@ paths:
           description: Salle introuvable
         '409':
           description: La salle a des réservations
+        
+    /salles/disponibles:
+    get:
+      summary: Lister les salles disponibles sur un créneau
+      parameters:
+        - name: debut
+          in: query
+          required: true
+          schema: {type: string, format: date-time, example: '2030-10-15T09:00:00Z'}
+        - name: fin
+          in: query
+          required: true
+          schema: {type: string, format: date-time, example: '2030-10-15T10:00:00Z'}
+      responses:
+        '200':
+          description: Salles disponibles (peut être vide)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Salle'}
+        '400':
+          description: Date absente, invalide, ou fin non postérieure au début
+
   /reservations:
     get:
       summary: Lister les réservations
